@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Séance A — Haut du corps + gainage</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg2: #1a1d27;
+      --bg3: #252836;
+      --text: #e8eaf0;
+      --text2: #8892a0;
+      --accent: #4f8ef7;
+      --border: #2a2f45;
+      --radius: 16px;
+      --p0: #e8c97e;
+      --p1: #7eb8e8;
+      --p2: #5ed48a;
+      --p3: #b87ee8;
+      --green: #4ade80;
+      --red: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    #app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; flex-direction: column; min-height: 100vh; }
+    .screen.active { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Welcome ── */
+    .w-header {
+      background: linear-gradient(160deg, #161c2e 0%, #0f1117 100%);
+      padding: 48px 24px 28px;
+    }
+    .w-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(79,142,247,0.12);
+      border: 1px solid rgba(79,142,247,0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .w-title { font-size: 24px; font-weight: 800; line-height: 1.25; letter-spacing: -0.4px; }
+    .w-sub { margin-top: 6px; font-size: 13px; color: var(--text2); }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 16px 24px;
+    }
+    .stat {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 6px;
+      text-align: center;
+    }
+    .stat-val { font-size: 17px; font-weight: 700; }
+    .stat-lbl { font-size: 9px; color: var(--text2); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.6px; }
+    .phases-list { padding: 0 24px; display: flex; flex-direction: column; gap: 8px; }
+    .phase-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+    }
+    .phase-pip { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .phase-row-name { font-size: 14px; font-weight: 600; flex: 1; }
+    .phase-row-time { font-size: 11px; color: var(--text2); }
+    .phase-row-count {
+      font-size: 11px;
+      color: var(--text2);
+      background: var(--bg3);
+      border-radius: 10px;
+      padding: 2px 8px;
+    }
+    .w-start {
+      margin: 20px 24px 40px;
+      padding: 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .w-start:active { opacity: 0.85; transform: scale(0.98); }
+
+    /* ── Exercise Screen ── */
+    .ex-topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .ex-phase-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg3);
+      border-radius: 20px;
+      padding: 5px 12px 5px 8px;
+      flex-shrink: 0;
+    }
+    .ex-phase-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .ex-phase-name { font-size: 12px; font-weight: 600; }
+    .ex-progress-text { margin-left: auto; font-size: 12px; color: var(--text2); font-weight: 500; white-space: nowrap; }
+    .progress-track { height: 3px; background: var(--bg3); flex-shrink: 0; }
+    .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+
+    .ex-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ex-name { font-size: 21px; font-weight: 800; line-height: 1.25; letter-spacing: -0.3px; }
+    .muscle-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid;
+      line-height: 1.4;
+    }
+
+    .cues-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .cues-toggle-row {
+      padding: 13px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cues-lbl { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+    .cues-chevron { font-size: 14px; color: var(--text2); transition: transform 0.2s; }
+    .cues-chevron.open { transform: rotate(180deg); }
+    .cues-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 9px; }
+    .cue {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .cue-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 7px; }
+
+    .note-box {
+      background: rgba(79,142,247,0.07);
+      border: 1px solid rgba(79,142,247,0.18);
+      border-radius: 12px;
+      padding: 11px 14px;
+      display: flex;
+      gap: 9px;
+    }
+    .note-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .note-text { font-size: 12.5px; color: var(--text2); line-height: 1.55; }
+
+    .sets-section { display: flex; flex-direction: column; gap: 12px; }
+    .sets-header { display: flex; justify-content: space-between; align-items: center; }
+    .sets-lbl { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+    .sets-reps { font-size: 15px; font-weight: 700; }
+    .sets-dots { display: flex; gap: 8px; flex-wrap: wrap; }
+    .set-dot {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.25s ease;
+      color: var(--text2);
+    }
+    .set-dot.done { background: var(--green); border-color: var(--green); color: #052010; }
+    .set-dot.current { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.2); }
+
+    /* ── Rest Timer Overlay ── */
+    .rest-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,12,20,0.97);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 100;
+      animation: fadeIn 0.2s ease;
+    }
+    .rest-overlay.hidden { display: none; }
+    .rest-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1.2px; }
+    .rest-subtitle { font-size: 14px; color: var(--text2); margin-top: -10px; }
+    .timer-wrap { position: relative; width: 180px; height: 180px; }
+    .timer-wrap svg { transform: rotate(-90deg); }
+    .timer-track { fill: none; stroke: var(--bg3); stroke-width: 10; }
+    .timer-arc { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.5s; }
+    .timer-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .timer-num { font-size: 52px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+    .timer-sec-lbl { font-size: 12px; color: var(--text2); margin-top: 2px; letter-spacing: 0.8px; }
+    .rest-actions { display: flex; gap: 12px; }
+    .btn-skip {
+      padding: 11px 22px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text2);
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-skip:active { opacity: 0.7; }
+    .btn-add-time {
+      padding: 11px 22px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--accent);
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-add-time:active { opacity: 0.7; }
+
+    /* Duration timer (for timed exercises) */
+    .duration-timer-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 16px 0; }
+
+    /* ── Bottom Action Bar ── */
+    .action-bar {
+      padding: 14px 20px 36px;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn-main {
+      width: 100%;
+      padding: 17px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+      letter-spacing: 0.2px;
+    }
+    .btn-main:active { opacity: 0.85; transform: scale(0.985); }
+    .btn-blue { background: var(--accent); color: #fff; }
+    .btn-green { background: var(--green); color: #052010; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 12px;
+      font-size: 14px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* ── Phase Transition ── */
+    .trans-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 40px 28px;
+      text-align: center;
+    }
+    .trans-icon { font-size: 52px; }
+    .trans-phase-dot { width: 52px; height: 52px; border-radius: 50%; margin: 0 auto; }
+    .trans-label { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1.2px; }
+    .trans-title { font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
+    .trans-sub { font-size: 14px; color: var(--text2); line-height: 1.6; }
+    .trans-exercises {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .trans-ex-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .trans-ex-row:last-child { border-bottom: none; }
+    .trans-ex-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text2); flex-shrink: 0; }
+    .trans-ex-name { flex: 1; }
+    .trans-ex-sets { color: var(--text2); font-size: 12px; }
+
+    /* ── Complete Screen ── */
+    .complete-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .complete-emoji { font-size: 72px; }
+    .complete-title { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+    .complete-sub { font-size: 15px; color: var(--text2); line-height: 1.6; max-width: 300px; }
+    .shake-card {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      text-align: left;
+    }
+    .shake-title { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .shake-text { font-size: 13px; color: var(--text2); line-height: 1.65; }
+    .btn-restart {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-restart:active { opacity: 0.7; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="s-welcome"    class="screen"></div>
+  <div id="s-exercise"   class="screen"></div>
+  <div id="s-transition" class="screen"></div>
+  <div id="s-complete"   class="screen"></div>
+  <div id="rest-overlay" class="rest-overlay hidden"></div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+const SESSION = {
+  title: "Séance A — Haut du corps + gainage",
+  subtitle: "Lundi matin · Préparation kitesurf juillet",
+  stats: [
+    { val: "~60'",    lbl: "Durée" },
+    { val: "21",      lbl: "Séries" },
+    { val: "75\"",    lbl: "Récup moy." },
+    { val: "6-7/10",  lbl: "Intensité" },
+  ],
+  phases: [
+    {
+      name: "Échauffement",
+      color: "var(--p0)",
+      timeRange: "0 → 10 min",
+      exercises: [
+        {
+          name: "Cercles d'épaules + rotations de poignets",
+          type: "duration",
+          duration: 120,
+          sets: 1,
+          reps: "2 min",
+          rest: 0,
+          cues: [
+            "Avant → arrière, amplitude progressive",
+            "Déverrouiller la coiffe des rotateurs",
+            "Mouvements lents et contrôlés",
+          ],
+        },
+        {
+          name: "Band pull-apart élastique",
+          type: "reps",
+          sets: 2,
+          reps: "15",
+          rest: 30,
+          cues: [
+            "Bras tendus, élastique horizontal",
+            "Ouverture thoracique, lent et contrôlé",
+          ],
+        },
+        {
+          name: "Cat-cow + rotation thoracique",
+          type: "reps",
+          sets: 1,
+          reps: "10 / côté",
+          rest: 0,
+          cues: [
+            "4 pattes : flexion/extension de colonne",
+            "Rotation T-spine, bras libre vers le plafond",
+          ],
+        },
+        {
+          name: "Traction élastique légère ou pendulaire",
+          type: "reps",
+          sets: 1,
+          reps: "15 reps lentes",
+          rest: 0,
+          cues: [
+            "Activation dorsaux à faible charge",
+            "Prépare le tirage horizontal",
+          ],
+        },
+      ],
+    },
+    {
+      name: "Bloc traction",
+      subtitle: "dorsal, biceps, coiffe",
+      color: "var(--p1)",
+      timeRange: "10 → 35 min",
+      exercises: [
+        {
+          name: "Tirage horizontal poulie basse",
+          type: "reps",
+          sets: 4,
+          reps: "10-12",
+          rest: 90,
+          muscleTag: "Dorsal + trapèze moyen · résistance barre de kite",
+          cues: [
+            "Coudes le long du buste",
+            "Omoplate en rétraction complète en fin de mouvement",
+            "Dos droit, pas de balancement du tronc",
+            "Tempo : 2\" sur la descente (excentrique lent)",
+          ],
+          note: "Exercice polyarticulaire principal — 4 séries lourdes, récup 90\" complètes.",
+        },
+        {
+          name: "Face pull poulie visage",
+          type: "reps",
+          sets: 3,
+          reps: "15",
+          rest: 60,
+          muscleTag: "Coiffe des rotateurs + deltoïde postérieur · prévention épaule kite",
+          cues: [
+            "Corde ou anneau, poulie à hauteur du visage",
+            "Tirer vers le front, coudes hauts",
+            "Rotation externe maximale en fin de mouvement",
+            "Charge légère, contrôle total — pas d'élan",
+          ],
+        },
+        {
+          name: "Tirage vertical — lat pulldown",
+          type: "reps",
+          sets: 3,
+          reps: "10-12",
+          rest: 75,
+          muscleTag: "Grand dorsal · traction verticale, force de rappel barre kite",
+          cues: [
+            "Prise large en pronation",
+            "Barre descend vers le haut du sternum (pas la nuque)",
+            "Ne pas cambrer excessivement",
+            "Descente contrôlée 3\"",
+          ],
+          note: "Muscle pré-fatigué après le tirage horizontal — qualité > charge.",
+        },
+      ],
+    },
+    {
+      name: "Bloc gainage anti-rotation",
+      color: "var(--p2)",
+      timeRange: "35 → 52 min",
+      exercises: [
+        {
+          name: "Pallof press élastique",
+          type: "reps",
+          sets: 3,
+          reps: "12 / côté",
+          rest: 60,
+          muscleTag: "Anti-rotation · geste exact du port du trapèze en kite",
+          cues: [
+            "Élastique fixé à mi-hauteur sur le côté",
+            "Bras tendus devant le sternum, résister à la rotation",
+            "Maintien 2\" bras tendus",
+            "Ne pas tourner les hanches — répéter l'autre côté",
+          ],
+        },
+        {
+          name: "Planche latérale avec rotation",
+          type: "reps",
+          sets: 3,
+          reps: "10 / côté",
+          rest: 60,
+          muscleTag: "Obliques + carré des lombes · stabilité latérale kite",
+          cues: [
+            "Planche latérale sur coude",
+            "Bras libre passe lentement sous le buste en rotation",
+            "Hanches hautes tout le long",
+            "Pas de torsion rapide",
+          ],
+        },
+        {
+          name: "Dead bug",
+          type: "reps",
+          sets: 3,
+          reps: "10 / côté",
+          rest: 55,
+          muscleTag: "Gainage profond · neuromusculaire anti-rotation",
+          cues: [
+            "Sur le dos, bras vers le plafond, genoux à 90°",
+            "Descendre bras droit + jambe gauche simultanément",
+            "Sans décoller le bas du dos — c'est la priorité",
+            "Expirer pendant l'effort, revenir lentement",
+          ],
+          note: "Récup courte volontaire — l'objectif est neuromusculaire, pas de force brute.",
+        },
+      ],
+    },
+    {
+      name: "Finisher + retour au calme",
+      color: "var(--p3)",
+      timeRange: "52 → 60 min",
+      exercises: [
+        {
+          name: "Superman / Bird-dog",
+          type: "reps",
+          sets: 2,
+          reps: "12 / côté",
+          rest: 30,
+          muscleTag: "Érecteurs du rachis · prévention lombalgie kite",
+          cues: [
+            "À 4 pattes : bras droit + jambe gauche",
+            "Maintien 3\", gainage total",
+            "Alterner côtés — mouvement lent",
+            "Ne pas lever la jambe trop haut",
+          ],
+        },
+        {
+          name: "Étirements épaules + dorsaux",
+          type: "duration",
+          duration: 300,
+          sets: 1,
+          reps: "5 min",
+          rest: 0,
+          cues: [
+            "Cross-body stretch épaule : 30\" × 2 côtés",
+            "Étirement dorsal en suspension barre ou au sol",
+            "Foam roller colonne si disponible",
+            "Respiration lente, relâchement progressif",
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+const S = {
+  screen: 'welcome',
+  phaseIdx: 0,
+  exIdx: 0,
+  setsDone: 0,        // how many sets completed in current exercise
+  exState: 'ready',   // 'ready' | 'resting' | 'timing' (for duration type)
+  timerRemaining: 0,
+  timerTotal: 0,
+  timerInterval: null,
+  cuesOpen: true,
+};
+
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+function phase()   { return SESSION.phases[S.phaseIdx]; }
+function exercise(){ return phase().exercises[S.exIdx]; }
+
+function totalExercises() {
+  return SESSION.phases.reduce((s, p) => s + p.exercises.length, 0);
+}
+function globalExIdx() {
+  let n = 0;
+  for (let i = 0; i < S.phaseIdx; i++) n += SESSION.phases[i].exercises.length;
+  return n + S.exIdx;
+}
+
+function clearTimer() {
+  if (S.timerInterval) { clearInterval(S.timerInterval); S.timerInterval = null; }
+}
+
+function fmt(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}:${String(sec).padStart(2,'0')}` : `${sec}`;
+}
+
+// ─────────────────────────────────────────
+// ROUTING
+// ─────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('s-' + name).classList.add('active');
+  S.screen = name;
+}
+
+// ─────────────────────────────────────────
+// RENDER WELCOME
+// ─────────────────────────────────────────
+function renderWelcome() {
+  const el = document.getElementById('s-welcome');
+  el.innerHTML = `
+    <div class="w-header">
+      <div class="w-badge">⚡ Séance du jour</div>
+      <div class="w-title">${SESSION.title}</div>
+      <div class="w-sub">${SESSION.subtitle}</div>
+    </div>
+    <div class="stats-grid">
+      ${SESSION.stats.map(s => `
+        <div class="stat">
+          <div class="stat-val">${s.val}</div>
+          <div class="stat-lbl">${s.lbl}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="phases-list">
+      ${SESSION.phases.map((p, i) => `
+        <div class="phase-row">
+          <div class="phase-pip" style="background:${p.color}"></div>
+          <div class="phase-row-name">${p.name}${p.subtitle ? ' <span style="color:var(--text2);font-weight:400">— ' + p.subtitle + '</span>' : ''}</div>
+          <div class="phase-row-count">${p.exercises.length} exo</div>
+          <div class="phase-row-time">${p.timeRange}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="flex:1"></div>
+    <button class="w-start" onclick="startSession()">Commencer la séance →</button>
+  `;
+  showScreen('welcome');
+}
+
+// ─────────────────────────────────────────
+// RENDER EXERCISE
+// ─────────────────────────────────────────
+function renderExercise() {
+  const p = phase();
+  const ex = exercise();
+  const globalPct = Math.round((globalExIdx() / totalExercises()) * 100);
+  const phaseExPct = Math.round(((S.exIdx + 1) / p.exercises.length) * 100);
+
+  // Set dots
+  const dotsHtml = Array.from({ length: ex.sets }, (_, i) => {
+    let cls = '';
+    if (i < S.setsDone) cls = 'done';
+    else if (i === S.setsDone) cls = 'current';
+    return `<div class="set-dot ${cls}">${i < S.setsDone ? '✓' : i + 1}</div>`;
+  }).join('');
+
+  // Muscle tag
+  const tagHtml = ex.muscleTag
+    ? `<div class="muscle-tag" style="color:${p.color};border-color:${p.color};background:color-mix(in srgb, ${p.color} 10%, transparent)">${ex.muscleTag}</div>`
+    : '';
+
+  // Note
+  const noteHtml = ex.note
+    ? `<div class="note-box"><div class="note-icon">💡</div><div class="note-text">${ex.note}</div></div>`
+    : '';
+
+  // Cues
+  const cuesHtml = ex.cues.map(c =>
+    `<div class="cue"><div class="cue-dot"></div><span>${c}</span></div>`
+  ).join('');
+
+  // Duration timer section (for timed exercises when timing active)
+  const isDuration = ex.type === 'duration';
+  const durationSection = isDuration && S.exState === 'timing'
+    ? `<div class="duration-timer-wrap">
+        <div class="timer-wrap" style="width:140px;height:140px">
+          ${timerSVG(140, S.timerRemaining, S.timerTotal, p.color)}
+        </div>
+       </div>`
+    : '';
+
+  // Action button
+  let actionBtn = '';
+  if (isDuration) {
+    if (S.exState === 'ready') {
+      actionBtn = `<button class="btn-main btn-blue" onclick="startDuration()">Démarrer (${ex.reps})</button>`;
+    } else if (S.exState === 'timing') {
+      actionBtn = `<button class="btn-main btn-outline" onclick="skipDuration()">Terminer l'exercice →</button>`;
+    } else {
+      actionBtn = nextExerciseBtn();
+    }
+  } else {
+    if (S.setsDone < ex.sets) {
+      const setLabel = ex.sets === 1 ? 'Série terminée ✓' : `Série ${S.setsDone + 1}/${ex.sets} terminée ✓`;
+      actionBtn = `<button class="btn-main btn-blue" onclick="completeSet()">${setLabel}</button>`;
+    } else {
+      actionBtn = nextExerciseBtn();
+    }
+  }
+
+  function nextExerciseBtn() {
+    const isLastEx = S.exIdx >= p.exercises.length - 1;
+    const isLastPhase = S.phaseIdx >= SESSION.phases.length - 1;
+    if (isLastEx && isLastPhase) {
+      return `<button class="btn-main btn-green" onclick="finishSession()">Terminer la séance 🎉</button>`;
+    }
+    const label = isLastEx ? `Phase suivante →` : `Exercice suivant →`;
+    return `<button class="btn-main btn-green" onclick="goNext()">${label}</button>`;
+  }
+
+  document.getElementById('s-exercise').innerHTML = `
+    <div class="ex-topbar">
+      <div class="ex-phase-badge">
+        <div class="ex-phase-dot" style="background:${p.color}"></div>
+        <div class="ex-phase-name">${p.name}</div>
+      </div>
+      <div class="ex-progress-text">Exo ${S.exIdx + 1}/${p.exercises.length}</div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" style="width:${globalPct}%"></div>
+    </div>
+    <div class="ex-body">
+      <div class="ex-name">${ex.name}</div>
+      ${tagHtml}
+      <div class="cues-card">
+        <div class="cues-toggle-row" onclick="toggleCues()">
+          <div class="cues-lbl">Points techniques clés</div>
+          <div class="cues-chevron ${S.cuesOpen ? 'open' : ''}" id="chevron">▾</div>
+        </div>
+        <div id="cues-body" class="cues-body" style="display:${S.cuesOpen ? 'flex' : 'none'}">
+          ${cuesHtml}
+        </div>
+      </div>
+      ${noteHtml}
+      ${durationSection}
+      <div class="sets-section">
+        <div class="sets-header">
+          <div class="sets-lbl">${isDuration ? 'Durée' : 'Séries & répétitions'}</div>
+          <div class="sets-reps">${ex.sets > 1 ? ex.sets + ' × ' : ''}${ex.reps}</div>
+        </div>
+        ${!isDuration ? `<div class="sets-dots">${dotsHtml}</div>` : ''}
+      </div>
+      <div style="height:8px"></div>
+    </div>
+    <div class="action-bar">
+      ${actionBtn}
+    </div>
+  `;
+  showScreen('exercise');
+}
+
+// ─────────────────────────────────────────
+// TIMER SVG
+// ─────────────────────────────────────────
+function timerSVG(size, remaining, total, color) {
+  const r = (size / 2) - 10;
+  const circ = 2 * Math.PI * r;
+  const progress = total > 0 ? remaining / total : 0;
+  const offset = circ * (1 - progress);
+  const isUrgent = remaining <= 5;
+  const strokeColor = isUrgent ? 'var(--red)' : (color || 'var(--accent)');
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
+      <circle class="timer-track" cx="${size/2}" cy="${size/2}" r="${r}"/>
+      <circle class="timer-arc"
+        cx="${size/2}" cy="${size/2}" r="${r}"
+        stroke="${strokeColor}"
+        stroke-dasharray="${circ}"
+        stroke-dashoffset="${offset}"
+      />
+    </svg>
+    <div class="timer-center">
+      <div class="timer-num" style="color:${isUrgent ? 'var(--red)' : 'var(--text)'}">${fmt(remaining)}</div>
+      <div class="timer-sec-lbl">${remaining >= 60 ? 'min' : 'sec'}</div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────
+// REST OVERLAY
+// ─────────────────────────────────────────
+function showRestOverlay(seconds, nextSetNum, totalSets) {
+  const overlay = document.getElementById('rest-overlay');
+  overlay.classList.remove('hidden');
+  S.timerRemaining = seconds;
+  S.timerTotal = seconds;
+  const p = phase();
+  const ex = exercise();
+
+  function updateOverlay() {
+    const isUrgent = S.timerRemaining <= 5;
+    overlay.innerHTML = `
+      <div class="rest-title">Récupération</div>
+      <div class="timer-wrap">
+        ${timerSVG(180, S.timerRemaining, S.timerTotal, p.color)}
+      </div>
+      <div class="rest-subtitle" style="color:var(--text2);font-size:13px;margin-top:-8px">
+        ${nextSetNum <= totalSets ? `Prochaine série : ${nextSetNum}/${totalSets} · ${ex.reps} reps` : ''}
+      </div>
+      <div class="rest-actions">
+        <button class="btn-add-time" onclick="addTime(15)">+15s</button>
+        <button class="btn-skip" onclick="skipRest()">Passer la pause →</button>
+      </div>
+    `;
+  }
+
+  updateOverlay();
+  clearTimer();
+  S.timerInterval = setInterval(() => {
+    S.timerRemaining--;
+    if (S.timerRemaining <= 0) {
+      clearTimer();
+      hideRestOverlay();
+      // vibrate if supported
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+      S.exState = 'ready';
+      renderExercise();
+    } else {
+      updateOverlay();
+    }
+  }, 1000);
+}
+
+function hideRestOverlay() {
+  document.getElementById('rest-overlay').classList.add('hidden');
+  document.getElementById('rest-overlay').innerHTML = '';
+}
+
+function skipRest() {
+  clearTimer();
+  hideRestOverlay();
+  S.exState = 'ready';
+  renderExercise();
+}
+
+function addTime(sec) {
+  S.timerRemaining = Math.min(S.timerRemaining + sec, S.timerTotal + 60);
+}
+
+// ─────────────────────────────────────────
+// DURATION TIMER (for timed exercises)
+// ─────────────────────────────────────────
+function startDuration() {
+  const ex = exercise();
+  S.exState = 'timing';
+  S.timerRemaining = ex.duration;
+  S.timerTotal = ex.duration;
+  renderExercise();
+  clearTimer();
+  S.timerInterval = setInterval(() => {
+    S.timerRemaining--;
+    if (S.timerRemaining <= 0) {
+      clearTimer();
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+      S.exState = 'done';
+      S.setsDone = 1;
+    }
+    renderExercise();
+  }, 1000);
+}
+
+function skipDuration() {
+  clearTimer();
+  S.exState = 'done';
+  S.setsDone = 1;
+  renderExercise();
+}
+
+// ─────────────────────────────────────────
+// ACTIONS
+// ─────────────────────────────────────────
+function startSession() {
+  S.phaseIdx = 0;
+  S.exIdx = 0;
+  S.setsDone = 0;
+  S.exState = 'ready';
+  renderExercise();
+}
+
+function completeSet() {
+  const ex = exercise();
+  S.setsDone++;
+  if (S.setsDone < ex.sets && ex.rest > 0) {
+    S.exState = 'resting';
+    renderExercise();
+    showRestOverlay(ex.rest, S.setsDone + 1, ex.sets);
+  } else if (S.setsDone < ex.sets) {
+    // no rest, just continue
+    S.exState = 'ready';
+    renderExercise();
+  } else {
+    // all sets done
+    S.exState = 'done';
+    renderExercise();
+  }
+}
+
+function goNext() {
+  clearTimer();
+  hideRestOverlay();
+  const p = phase();
+  if (S.exIdx < p.exercises.length - 1) {
+    S.exIdx++;
+    S.setsDone = 0;
+    S.exState = 'ready';
+    renderExercise();
+  } else if (S.phaseIdx < SESSION.phases.length - 1) {
+    // go to phase transition
+    S.phaseIdx++;
+    S.exIdx = 0;
+    S.setsDone = 0;
+    S.exState = 'ready';
+    renderTransition();
+  } else {
+    finishSession();
+  }
+}
+
+function finishSession() {
+  clearTimer();
+  renderComplete();
+}
+
+function toggleCues() {
+  S.cuesOpen = !S.cuesOpen;
+  const body = document.getElementById('cues-body');
+  const chev = document.getElementById('chevron');
+  if (body) body.style.display = S.cuesOpen ? 'flex' : 'none';
+  if (chev) {
+    chev.classList.toggle('open', S.cuesOpen);
+  }
+}
+
+// ─────────────────────────────────────────
+// PHASE TRANSITION
+// ─────────────────────────────────────────
+function renderTransition() {
+  const p = phase();
+  const icons = ['🔥', '💪', '🧱', '🧘'];
+  const desc = [
+    "C'est parti pour le travail sérieux !",
+    "Les dorsaux vont chauffer.",
+    "Place au gainage — stabilité et contrôle.",
+    "Retour au calme, bien mérité.",
+  ];
+  const exRows = p.exercises.map(ex => `
+    <div class="trans-ex-row">
+      <div class="trans-ex-dot" style="background:${p.color}"></div>
+      <div class="trans-ex-name">${ex.name}</div>
+      <div class="trans-ex-sets">${ex.type === 'duration' ? ex.reps : ex.sets + '×' + ex.reps}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('s-transition').innerHTML = `
+    <div class="trans-screen">
+      <div style="font-size:52px">${icons[S.phaseIdx] || '▶'}</div>
+      <div class="trans-label">Phase ${S.phaseIdx + 1} / ${SESSION.phases.length}</div>
+      <div class="trans-title" style="color:${p.color}">${p.name}${p.subtitle ? '<br><span style="font-size:18px;font-weight:600;color:var(--text2)">' + p.subtitle + '</span>' : ''}</div>
+      <div class="trans-sub">${p.timeRange} · ${desc[S.phaseIdx] || ''}</div>
+      <div class="trans-exercises">${exRows}</div>
+      <div style="flex:1"></div>
+      <button class="btn-main btn-blue" onclick="beginPhase()" style="width:100%;margin-top:16px">Commencer →</button>
+    </div>
+  `;
+  showScreen('transition');
+}
+
+function beginPhase() {
+  renderExercise();
+}
+
+// ─────────────────────────────────────────
+// COMPLETE
+// ─────────────────────────────────────────
+function renderComplete() {
+  document.getElementById('s-complete').innerHTML = `
+    <div class="complete-body">
+      <div class="complete-emoji">🎉</div>
+      <div class="complete-title">Séance terminée !</div>
+      <div class="complete-sub">Excellent travail. 21 séries · Haut du corps + gainage · Kitesurf ready 🪁</div>
+      <div class="shake-card">
+        <div class="shake-title">🥤 Shake de récupération — dans les 30 min</div>
+        <div class="shake-text">30g whey + 250ml lait + 1 banane.<br>Fenêtre anabolique critique — ne pas sauter, surtout les jours de muscu.<br>Déjeuner complet 1h30–2h après.</div>
+      </div>
+      <button class="btn-restart" onclick="restart()">↩ Recommencer la séance</button>
+    </div>
+  `;
+  showScreen('complete');
+}
+
+function restart() {
+  clearTimer();
+  S.phaseIdx = 0;
+  S.exIdx = 0;
+  S.setsDone = 0;
+  S.exState = 'ready';
+  S.cuesOpen = true;
+  renderWelcome();
+}
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+renderWelcome();
+</script>
+</body>
+</html>
